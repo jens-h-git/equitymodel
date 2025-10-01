@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eierandel- og Utvanningsmodell</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use Inter font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#facc15',
+                        'tertiary': '#10b981',
+                        'bg-light': '#f9fafb',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        /* Custom styling for input focused state */
+        input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 1px #4f46e5;
+        }
+        .card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2">Eierandel- og Utvanningsmodell</h1>
+            <p class="text-lg text-gray-600">Modeller effekten av SAFE-konvertering, Seed- og Serie A-runder på eierskapet.</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+            <!-- Initial Ownership -->
+            <div class="card bg-white p-6 rounded-xl border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">1. Initial Fordeling (%)</h2>
+                <div class="space-y-3">
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Founder 1 (%)</span>
+                        <input type="number" id="f1_percent" value="30" min="0" max="100" step="1" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">F2, F3, F4 (hver) (%)</span>
+                        <input type="number" id="fx_percent" value="20" min="0" max="100" step="1" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Opsjonspool (ESOP) (%)</span>
+                        <input type="number" id="esop_percent" value="10" min="0" max="100" step="1" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                    <p id="total_initial_pct" class="text-sm font-bold text-right pt-2"></p>
+                </div>
+            </div>
+
+            <!-- Seed Round Data -->
+            <div class="card bg-white p-6 rounded-xl border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">2. Seed-Runde</h2>
+                <div class="space-y-3">
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">SAFE Konvertering (NOK)</span>
+                        <input type="number" id="safe_amount" value="400000" min="0" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Kapital Hentet (NOK)</span>
+                        <input type="number" id="seed_capital" value="5000000" min="0" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Pre-Money Verdsettelse (NOK)</span>
+                        <input type="number" id="seed_pre_money" value="25000000" min="1" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Series A Round Data -->
+            <div class="card bg-white p-6 rounded-xl border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">3. Serie A-Runde</h2>
+                <div class="space-y-3">
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Kapital Hentet (NOK)</span>
+                        <input type="number" id="series_a_capital" value="20000000" min="0" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Pre-Money Verdsettelse (NOK)</span>
+                        <input type="number" id="series_a_pre_money" value="100000000" min="1" oninput="calculateDilution()"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 text-lg font-mono">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Table Section -->
+        <div class="card bg-white p-6 rounded-xl border border-gray-200 overflow-x-auto">
+            <h2 class="text-2xl font-semibold text-primary mb-4">Resultat: Eierandeler (%)</h2>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Eier</th>
+                        <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Initial</th>
+                        <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-secondary/20">Post-Seed</th>
+                        <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-tertiary/20 rounded-tr-lg">Post-Serie A</th>
+                    </tr>
+                </thead>
+                <tbody id="results_body" class="bg-white divide-y divide-gray-200 text-right">
+                    <!-- Results will be injected here by JavaScript -->
+                </tbody>
+            </table>
+            <div id="valuation_summary" class="mt-4 text-sm text-gray-600 space-y-1">
+                <p>Post-Seed Verdsettelse: <span id="post_seed_val" class="font-bold text-gray-800"></span></p>
+                <p>Post-Serie A Verdsettelse: <span id="post_a_val" class="font-bold text-gray-800"></span></p>
+            </div>
+            <div id="error_message" class="mt-4 text-sm font-semibold text-red-600 hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global constant for easy share-based calculation
+        const INITIAL_SHARES = 1000;
+
+        // Helper function to format NOK currency
+        const formatNOK = (amount) => {
+            return new Intl.NumberFormat('no-NO', { style: 'currency', currency: 'NOK', minimumFractionDigits: 0 }).format(amount);
+        };
+
+        // Helper function to format percentages
+        const formatPercent = (value) => {
+            return (value * 100).toFixed(2) + '%';
+        };
+
+        // Main calculation function
+        function performCalculation() {
+            // --- 1. Hent Inndata ---
+            const f1Pct = parseFloat(document.getElementById('f1_percent').value) / 100;
+            const fxPct = parseFloat(document.getElementById('fx_percent').value) / 100;
+            const esopPct = parseFloat(document.getElementById('esop_percent').value) / 100;
+
+            const safeAmount = parseFloat(document.getElementById('safe_amount').value) || 0;
+            const seedCapital = parseFloat(document.getElementById('seed_capital').value) || 0;
+            const seedPreMoney = parseFloat(document.getElementById('seed_pre_money').value) || 1; // Unngå null for divisjon
+
+            const seriesACapital = parseFloat(document.getElementById('series_a_capital').value) || 0;
+            const seriesAPreMoney = parseFloat(document.getElementById('series_a_pre_money').value) || 1;
+
+            const totalInitialPct = f1Pct + (fxPct * 3) + esopPct;
+            if (Math.abs(totalInitialPct - 1.0) > 0.001) {
+                return { error: `Initial andeler må være 100%. Nåværende: ${(totalInitialPct * 100).toFixed(1)}%` };
+            }
+
+            // --- 2. Initial Aksjefordeling (Pre-Seed/Pre-SAFE) ---
+            let shares = {
+                F1: f1Pct * INITIAL_SHARES,
+                FX: fxPct * INITIAL_SHARES, // Representerer F2, F3, F4
+                ESOP: esopPct * INITIAL_SHARES,
+                SAFE: 0,
+                Seed: 0,
+                SeriesA: 0
+            };
+
+            let currentTotalShares = INITIAL_SHARES;
+            const initialOwnership = {
+                F1: f1Pct, F2: fxPct, F3: fxPct, F4: fxPct, ESOP: esopPct, SAFE: 0, Seed: 0, SeriesA: 0
+            };
+
+            // --- 3. Seed-Runde (Steg 1: SAFE Konvertering) ---
+            let PPA_seed = seedPreMoney / currentTotalShares;
+            let safeShares = 0;
+            
+            if (safeAmount > 0 && PPA_seed > 0) {
+                safeShares = safeAmount / PPA_seed;
+                shares.SAFE += safeShares;
+                currentTotalShares += safeShares;
+            }
+
+            // --- 4. Seed-Runde (Steg 2: Ny Seed Kapital) ---
+            let seedShares = 0;
+            if (seedCapital > 0 && PPA_seed > 0) {
+                seedShares = seedCapital / PPA_seed;
+                shares.Seed += seedShares;
+                currentTotalShares += seedShares;
+            }
+
+            // Post-Seed Beregninger
+            const postSeedOwnership = {
+                F1: shares.F1 / currentTotalShares,
+                F2: shares.FX / currentTotalShares,
+                F3: shares.FX / currentTotalShares,
+                F4: shares.FX / currentTotalShares,
+                ESOP: shares.ESOP / currentTotalShares,
+                SAFE: shares.SAFE / currentTotalShares,
+                Seed: shares.Seed / currentTotalShares,
+                SeriesA: 0
+            };
+            const postSeedValuation = seedPreMoney + seedCapital + safeAmount;
+
+            // --- 5. Serie A-Runde ---
+            let PPA_seriesA = seriesAPreMoney / currentTotalShares;
+            let seriesAShares = 0;
+
+            if (seriesACapital > 0 && PPA_seriesA > 0) {
+                seriesAShares = seriesACapital / PPA_seriesA;
+                shares.SeriesA += seriesAShares;
+                currentTotalShares += seriesAShares;
+            }
+
+            // Post-Serie A Beregninger
+            const postAOwnership = {
+                F1: shares.F1 / currentTotalShares,
+                F2: shares.FX / currentTotalShares,
+                F3: shares.FX / currentTotalShares,
+                F4: shares.FX / currentTotalShares,
+                ESOP: shares.ESOP / currentTotalShares,
+                SAFE: shares.SAFE / currentTotalShares,
+                Seed: shares.Seed / currentTotalShares,
+                SeriesA: shares.SeriesA / currentTotalShares
+            };
+            const postAValuation = seriesAPreMoney + seriesACapital;
+
+            return { initial: initialOwnership, postSeed: postSeedOwnership, postA: postAOwnership, postSeedValuation, postAValuation };
+        }
+
+        // Function to update the UI
+        function updateUI(results) {
+            const tableBody = document.getElementById('results_body');
+            const errorMessage = document.getElementById('error_message');
+            const totalInitialPctDisplay = document.getElementById('total_initial_pct');
+
+            if (results.error) {
+                errorMessage.textContent = results.error;
+                errorMessage.classList.remove('hidden');
+                tableBody.innerHTML = '';
+                totalInitialPctDisplay.textContent = results.error;
+                totalInitialPctDisplay.classList.add('text-red-600');
+                return;
+            }
+            
+            errorMessage.classList.add('hidden');
+            totalInitialPctDisplay.textContent = 'Sum: 100.0%';
+            totalInitialPctDisplay.classList.remove('text-red-600');
+
+
+            const owners = [
+                { name: 'Founder 1', key: 'F1' },
+                { name: 'Founder 2', key: 'F2' },
+                { name: 'Founder 3', key: 'F3' },
+                { name: 'Founder 4', key: 'F4' },
+                { name: 'Opsjonspool (ESOP)', key: 'ESOP' },
+                { name: 'SAFE Investor', key: 'SAFE', color: 'text-orange-500' },
+                { name: 'Seed Investor (Ny)', key: 'Seed', color: 'text-primary' },
+                { name: 'Serie A Investor (Ny)', key: 'SeriesA', color: 'text-tertiary' }
+            ];
+
+            let html = '';
+            let founderTotalInitial = 0;
+            let founderTotalPostSeed = 0;
+            let founderTotalPostA = 0;
+
+            owners.forEach(owner => {
+                const isFounder = owner.key.startsWith('F') && owner.key !== 'F';
+                
+                const initial = results.initial[owner.key] || 0;
+                const postSeed = results.postSeed[owner.key] || 0;
+                const postA = results.postA[owner.key] || 0;
+
+                html += `
+                    <tr class="${owner.color || ''} hover:bg-gray-100 transition-colors">
+                        <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 text-left">${owner.name}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm font-mono">${formatPercent(initial)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm font-mono bg-secondary/10">${formatPercent(postSeed)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm font-mono bg-tertiary/10">${formatPercent(postA)}</td>
+                    </tr>
+                `;
+                
+                if (isFounder || owner.key === 'ESOP') {
+                    founderTotalInitial += initial;
+                    founderTotalPostSeed += postSeed;
+                    founderTotalPostA += postA;
+                }
+            });
+
+            // Add Total Founder & ESOP row
+            html += `
+                <tr class="bg-gray-100 font-bold border-t-2 border-gray-300">
+                    <td class="px-3 py-3 whitespace-nowrap text-sm text-left">Founders + ESOP (SUM)</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-mono">${formatPercent(founderTotalInitial)}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-mono bg-secondary/20">${formatPercent(founderTotalPostSeed)}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-mono bg-tertiary/20">${formatPercent(founderTotalPostA)}</td>
+                </tr>
+            `;
+
+            tableBody.innerHTML = html;
+
+            // Update valuation summary
+            document.getElementById('post_seed_val').textContent = formatNOK(results.postSeedValuation);
+            document.getElementById('post_a_val').textContent = formatNOK(results.postAValuation);
+        }
+
+        function calculateDilution() {
+            const results = performCalculation();
+            updateUI(results);
+        }
+
+        // Initial call to populate the table with default values on load
+        window.onload = calculateDilution;
+
+    </script>
+</body>
+</html>
